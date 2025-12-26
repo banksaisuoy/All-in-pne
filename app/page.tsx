@@ -1,65 +1,113 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { Search, Bell, MessageCircle } from 'lucide-react';
+import VisualSearch from '@/components/shop/VisualSearch';
+import { motion } from 'framer-motion';
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <main className="max-w-md mx-auto md:max-w-full md:px-0 min-h-screen">
+
+      {/* 1. Header & Search */}
+      <header className="sticky top-0 z-40 bg-gradient-to-r from-orange-500 to-red-600 p-4 pb-8 rounded-b-3xl shadow-lg md:rounded-none">
+         <div className="flex justify-between items-center text-white mb-4">
+            <h1 className="font-black text-2xl tracking-tighter italic">NeuroMarket</h1>
+            <div className="flex gap-4">
+                <Bell className="w-6 h-6" />
+                <MessageCircle className="w-6 h-6" />
+            </div>
+         </div>
+
+         <div className="relative">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Search className="w-5 h-5 text-gray-400" />
+            </div>
+            <input
+                type="text"
+                placeholder="Ask Gemini: 'Best gifts for gamers?'"
+                className="w-full bg-white text-gray-900 pl-10 pr-12 py-3 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <div className="absolute inset-y-0 right-2 flex items-center">
+                <VisualSearch />
+            </div>
+         </div>
+      </header>
+
+      {/* 2. Hero Carousel (Mock) */}
+      <div className="px-4 -mt-4 mb-6">
+        <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="bg-white rounded-2xl shadow-sm overflow-hidden h-40 flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center"
+        >
+            <div className="bg-black/40 w-full h-full flex flex-col items-center justify-center text-white text-center p-4">
+                <h2 className="text-2xl font-bold mb-2">Flash Sale Ending Soon!</h2>
+                <div className="flex gap-2 font-mono text-sm">
+                    <span className="bg-red-600 px-2 py-1 rounded">02</span>:
+                    <span className="bg-red-600 px-2 py-1 rounded">14</span>:
+                    <span className="bg-red-600 px-2 py-1 rounded">35</span>
+                </div>
+            </div>
+        </motion.div>
+      </div>
+
+      {/* 3. Categories */}
+      <div className="px-4 mb-8">
+        <h3 className="font-bold text-gray-800 mb-4 px-1">Categories</h3>
+        <div className="grid grid-cols-5 gap-4">
+            {['Fashion', 'Tech', 'Beauty', 'Home', 'Toys', 'Sports', 'Auto', 'Pets', 'Books', 'More'].map((cat, i) => (
+                <div key={i} className="flex flex-col items-center gap-2">
+                    <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 text-lg font-bold">
+                        {cat[0]}
+                    </div>
+                    <span className="text-[10px] text-gray-600 font-medium">{cat}</span>
+                </div>
+            ))}
         </div>
-      </main>
-    </div>
+      </div>
+
+      {/* 4. For You (Masonry Grid) */}
+      <div className="px-4 pb-24">
+        <h3 className="font-bold text-gray-800 mb-4 px-1 text-lg">For You</h3>
+        <div className="columns-2 gap-4 space-y-4">
+             {[...Array(8)].map((_, i) => (
+                 <motion.div
+                    key={i}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    className="break-inside-avoid bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100"
+                 >
+                    <div className="h-40 bg-gray-200 w-full relative">
+                        {/* Mock Image Placeholder */}
+                        <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md">
+                            -{Math.floor(Math.random() * 50) + 10}%
+                        </div>
+                    </div>
+                    <div className="p-3">
+                        <h4 className="text-sm font-medium text-gray-800 line-clamp-2 leading-tight mb-2">
+                            Ultra Wireless Noise Cancelling Headphones {i}
+                        </h4>
+                        <div className="flex items-end justify-between">
+                            <div>
+                                <p className="text-orange-600 font-bold text-base">$129</p>
+                                <p className="text-gray-400 text-[10px] line-through">$299</p>
+                            </div>
+                            <div className="text-[10px] text-gray-500">
+                                {Math.floor(Math.random() * 5000)} sold
+                            </div>
+                        </div>
+                    </div>
+                 </motion.div>
+             ))}
+        </div>
+
+        <div className="mt-8 text-center">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+        </div>
+      </div>
+
+    </main>
   );
 }
