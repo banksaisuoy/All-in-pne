@@ -84,7 +84,7 @@ export async function saveProductToDb(data: ProductMetadata & { imageUrl: string
             price: data.price,
             image_url: data.imageUrl,
             tags: data.tags,
-            embedding: embedding, // Save the vector
+            vector_embedding: embedding, // Save the vector
         })
         .select()
         .single();

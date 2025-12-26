@@ -12,13 +12,13 @@ create table products (
   image_url text not null,
   stock_quantity integer default 0,
   tags jsonb default '[]', -- AI generated tags
-  embedding vector(768), -- Gemini embedding dimension (check specific model, usually 768 or 1536)
+  vector_embedding vector(768), -- Gemini embedding dimension
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 -- INDEX for semantic search
-create index on products using ivfflat (embedding vector_cosine_ops)
+create index on products using ivfflat (vector_embedding vector_cosine_ops)
 with (lists = 100);
 
 -- INVENTORY LOGS (For AI War Room)
@@ -75,6 +75,7 @@ returns table (
   name text,
   description text,
   price decimal,
+  image_url text,
   similarity float
 )
 language sql stable
@@ -84,9 +85,10 @@ as $$
     products.name,
     products.description,
     products.price,
-    1 - (products.embedding <=> query_embedding) as similarity
+    products.image_url,
+    1 - (products.vector_embedding <=> query_embedding) as similarity
   from products
-  where 1 - (products.embedding <=> query_embedding) > match_threshold
-  order by products.embedding <=> query_embedding
+  where 1 - (products.vector_embedding <=> query_embedding) > match_threshold
+  order by products.vector_embedding <=> query_embedding
   limit match_count;
 $$;
