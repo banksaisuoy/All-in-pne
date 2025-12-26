@@ -1,7 +1,7 @@
 'use server';
 
-import { generateObject } from 'ai';
-import { aiModel } from '@/lib/ai/config';
+import { generateObject, embed } from 'ai';
+import { aiModel, embeddingModel } from '@/lib/ai/config';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 
@@ -19,6 +19,7 @@ export type ProductMetadata = z.infer<typeof productMetadataSchema>;
 
 export async function generateProductMetadata(imageBase64: string): Promise<ProductMetadata> {
   try {
+    // 1. Generate Metadata with Gemini Vision (Base64 handling ensures privacy/no public URL needed)
     const { object } = await generateObject({
       model: aiModel,
       schema: productMetadataSchema,
@@ -44,19 +45,36 @@ export async function saveProductToDb(data: ProductMetadata & { imageUrl: string
     // In a real app, we would use the server-side supabase client with service role for admin tasks
     // verifying permissions. For this demo, we assume the environment is set up.
 
-    // Note: We are using process.env here directly for the server action.
-    // Ideally use createClient from @supabase/ssr or similar for auth context.
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Use service role for admin writes if needed, or just standard if using RLS with user context
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Use service role for admin writes
 
-    // Fallback for demo if keys aren't present to prevent crash in non-configured env
+    // Fallback for demo if keys aren't present
     if (!supabaseUrl || !supabaseServiceKey) {
-        console.warn("Supabase keys missing. Simulating DB save.");
-        return { success: true, id: 'simulated-id', ...data };
+        console.warn("Supabase keys missing. Simulating DB save with embedding.");
+        return { success: true, id: 'simulated-id', ...data, embedding_simulated: true };
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // 2. Generate Vector Embedding using text-embedding-004
+    // We combine name, description, and tags for a rich semantic representation
+    const textToEmbed = `${data.name} ${data.description} ${data.tags.join(' ')}`;
+
+    let embedding: number[] = [];
+    try {
+        const { embedding: generatedEmbedding } = await embed({
+            model: embeddingModel,
+            value: textToEmbed,
+        });
+        embedding = generatedEmbedding;
+    } catch (error) {
+        console.error("Embedding Generation Error:", error);
+        // We might choose to proceed without embedding or fail hard.
+        // For a "God Mode" system, we likely want to fail or retry, but here we'll throw.
+        throw new Error("Failed to generate vector embedding.");
+    }
+
+    // 3. Save to Supabase (Transactional atomic insert logic via single query)
     const { data: insertedData, error } = await supabase
         .from('products')
         .insert({
@@ -66,7 +84,7 @@ export async function saveProductToDb(data: ProductMetadata & { imageUrl: string
             price: data.price,
             image_url: data.imageUrl,
             tags: data.tags,
-            // embedding: ... (Would generate embedding here in a real scenario using another AI call or DB trigger)
+            embedding: embedding, // Save the vector
         })
         .select()
         .single();
