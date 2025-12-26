@@ -48,8 +48,8 @@ export default function RealTimeMap() {
                     }}
                     className="absolute w-4 h-4 rounded-full bg-orange-500 blur-sm"
                     style={{
-                        top: `${Math.random() * 80 + 10}%`,
-                        left: `${Math.random() * 80 + 10}%`
+                        top: `${(i + 1) * 15}%`,
+                        left: `${(i + 1) * 12}%`
                     }}
                  />
              ))}

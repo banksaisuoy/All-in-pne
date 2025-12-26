@@ -3,6 +3,8 @@ import { ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/db/server';
 import { generateEmbedding } from '@/lib/ai';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SearchResults({
   searchParams,
 }: {
@@ -29,7 +31,7 @@ export default async function SearchResults({
                <ArrowLeft className="w-6 h-6" />
            </Link>
            <div className="flex-1 bg-gray-100 rounded-lg px-4 py-2 text-sm text-gray-800 truncate">
-               "{q}"
+               &quot;{q}&quot;
            </div>
        </div>
 

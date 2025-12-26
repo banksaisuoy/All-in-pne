@@ -40,5 +40,5 @@ export async function searchByImage(formData: FormData) {
   // 2. Redirect to results page with the description as the query
   // In a real app, we might pass the IDs found, but for now let's just search by the description text
   // or pass the description to the search page.
-  redirect(`/search/results?q=${encodeURIComponent(description)}`);
+  redirect(`/search?q=${encodeURIComponent(description)}`);
 }

@@ -27,6 +27,11 @@ export default function Home() {
                 type="text"
                 placeholder="Ask Gemini: 'Best gifts for gamers?'"
                 className="w-full bg-white text-gray-900 pl-10 pr-12 py-3 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        window.location.href = `/search?q=${encodeURIComponent(e.currentTarget.value)}`;
+                    }
+                }}
             />
             <div className="absolute inset-y-0 right-2 flex items-center">
                 <VisualSearch />
@@ -82,7 +87,7 @@ export default function Home() {
                     <div className="h-40 bg-gray-200 w-full relative">
                         {/* Mock Image Placeholder */}
                         <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md">
-                            -{Math.floor(Math.random() * 50) + 10}%
+                            -{(i * 5) + 10}%
                         </div>
                     </div>
                     <div className="p-3">
@@ -95,7 +100,7 @@ export default function Home() {
                                 <p className="text-gray-400 text-[10px] line-through">$299</p>
                             </div>
                             <div className="text-[10px] text-gray-500">
-                                {Math.floor(Math.random() * 5000)} sold
+                                {(i + 1) * 123} sold
                             </div>
                         </div>
                     </div>
