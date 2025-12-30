@@ -12,8 +12,8 @@ export default function MobileNav() {
     { name: 'Home', href: '/', icon: Home },
     { name: 'Feed', href: '/feed', icon: ShoppingBag },
     { name: 'Live', href: '/live', icon: Radio },
-    { name: 'Cart', href: '/cart', icon: ShoppingCart },
-    { name: 'Me', href: '/me', icon: User },
+    { name: 'Cart', href: '/checkout', icon: ShoppingCart },
+    { name: 'Admin', href: '/admin/products', icon: User },
   ];
 
   // Hide on admin routes
