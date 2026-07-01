@@ -1,0 +1,26 @@
+
+> neuromarket@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.1.3
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.2:3000
+
+ ✓ Starting...
+ ✓ Ready in 1930ms
+ ○ Compiling / ...
+Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled / in 12.6s (1547 modules)
+ GET / 200 in 13979ms
+ ✓ Compiled in 1332ms (729 modules)
+ GET / 200 in 66ms
+ ○ Compiling /search ...
+ ✓ Compiled /search in 1262ms (1530 modules)
+ GET /search 200 in 1527ms
+ ✓ Compiled /admin/products in 455ms (1537 modules)
+ GET /admin/products 200 in 591ms
+ ○ Compiling /checkout ...
+ ✓ Compiled /checkout in 714ms (1544 modules)
+ GET /checkout 200 in 916ms
