@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Camera, Search, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 export default function VisualSearchPage() {
     const [file, setFile] = useState<File | null>(null);
@@ -70,7 +71,7 @@ export default function VisualSearchPage() {
                         <div className="flex items-center justify-center w-full">
                             <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                                 {previewUrl ? (
-                                    <img src={previewUrl} alt="Preview" className="h-full object-contain p-2" />
+                                    <div className="relative w-full h-full"><Image src={previewUrl} alt="Preview" fill className="object-contain p-2" unoptimized /></div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted-foreground">
                                         <Camera className="w-10 h-10 mb-2" />
@@ -121,14 +122,7 @@ export default function VisualSearchPage() {
                                 <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                                     <div className="aspect-square relative bg-muted">
                                         {/* In a real app, use Next.js Image component */}
-                                        <img
-                                            src={product.imageUrl}
-                                            alt={product.name}
-                                            className="object-cover w-full h-full"
-                                            onError={(e) => {
-                                                (e.target as HTMLImageElement).src = 'https://placehold.co/400x400?text=No+Image';
-                                            }}
-                                        />
+                                        <Image src={product.imageUrl} alt={product.name} fill className="object-cover" onError={(e) => { (e.target as HTMLImageElement).srcset = "https://placehold.co/400x400?text=No+Image"; }} />
                                         <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
                                             {Math.round(product.similarity * 100)}% Match
                                         </div>
