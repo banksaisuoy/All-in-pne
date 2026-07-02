@@ -1,6 +1,7 @@
 'use client';
+import Image from "next/image";
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { generateProductMetadata, saveProductToDb, ProductMetadata } from '@/lib/actions/upload-product';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +16,7 @@ export default function MagicUploader() {
     const [generatedData, setGeneratedData] = useState<ProductMetadata | null>(null);
     const [statusMessage, setStatusMessage] = useState<string>('');
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const selectedFile = e.target.files[0];
             setFile(selectedFile);
@@ -23,9 +24,9 @@ export default function MagicUploader() {
             setGeneratedData(null);
             setStatusMessage('');
         }
-    };
+    }, []);
 
-    const handleAnalyze = async () => {
+    const handleAnalyze = useCallback(async () => {
         if (!file) return;
 
         setIsAnalyzing(true);
@@ -58,9 +59,9 @@ export default function MagicUploader() {
             setIsAnalyzing(false);
             setStatusMessage('Error processing file.');
         }
-    };
+    }, [file]);
 
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         if (!generatedData || !previewUrl) return;
 
         setIsSaving(true);
@@ -82,7 +83,7 @@ export default function MagicUploader() {
         } finally {
             setIsSaving(false);
         }
-    };
+    }, [generatedData, previewUrl]);
 
     return (
         <div className="max-w-4xl mx-auto p-8">
@@ -102,7 +103,9 @@ export default function MagicUploader() {
                         <div className="flex items-center justify-center w-full">
                             <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                                 {previewUrl ? (
-                                    <img src={previewUrl} alt="Preview" className="h-full object-contain" />
+                                    <div className="relative w-full h-full">
+<Image src={previewUrl} alt="Preview" fill unoptimized className="h-full object-contain" sizes="100vw" />
+</div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                         <Upload className="w-8 h-8 mb-4 text-gray-500" />
