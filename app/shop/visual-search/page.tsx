@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { searchSimilarProducts, SearchResult } from '@/lib/actions/visual-search';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Camera, Search, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 export default function VisualSearchPage() {
     const [file, setFile] = useState<File | null>(null);
@@ -14,7 +15,7 @@ export default function VisualSearchPage() {
     const [results, setResults] = useState<SearchResult[]>([]);
     const [error, setError] = useState<string | null>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const selectedFile = e.target.files[0];
             setFile(selectedFile);
@@ -22,9 +23,9 @@ export default function VisualSearchPage() {
             setResults([]);
             setError(null);
         }
-    };
+    }, []);
 
-    const handleSearch = async () => {
+    const handleSearch = useCallback(async () => {
         if (!file) return;
 
         setIsSearching(true);
@@ -50,7 +51,7 @@ export default function VisualSearchPage() {
             setError("Error processing image.");
             setIsSearching(false);
         }
-    };
+    }, [file]);
 
     return (
         <div className="container mx-auto p-4 max-w-6xl">
@@ -70,7 +71,9 @@ export default function VisualSearchPage() {
                         <div className="flex items-center justify-center w-full">
                             <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                                 {previewUrl ? (
-                                    <img src={previewUrl} alt="Preview" className="h-full object-contain p-2" />
+                                    <div className="relative w-full h-full p-2">
+                                        <Image src={previewUrl} alt="Preview" fill unoptimized className="object-contain" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+                                    </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted-foreground">
                                         <Camera className="w-10 h-10 mb-2" />
@@ -120,14 +123,12 @@ export default function VisualSearchPage() {
                             {results.map((product) => (
                                 <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                                     <div className="aspect-square relative bg-muted">
-                                        {/* In a real app, use Next.js Image component */}
-                                        <img
-                                            src={product.imageUrl}
+                                        <Image
+                                            src={product.imageUrl || 'https://placehold.co/400x400?text=No+Image'}
                                             alt={product.name}
+                                            fill
                                             className="object-cover w-full h-full"
-                                            onError={(e) => {
-                                                (e.target as HTMLImageElement).src = 'https://placehold.co/400x400?text=No+Image';
-                                            }}
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         />
                                         <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
                                             {Math.round(product.similarity * 100)}% Match
