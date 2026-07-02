@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import Image from 'next/image';
 import { searchSimilarProducts, SearchResult } from '@/lib/actions/visual-search';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -14,7 +15,7 @@ export default function VisualSearchPage() {
     const [results, setResults] = useState<SearchResult[]>([]);
     const [error, setError] = useState<string | null>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const selectedFile = e.target.files[0];
             setFile(selectedFile);
@@ -22,9 +23,9 @@ export default function VisualSearchPage() {
             setResults([]);
             setError(null);
         }
-    };
+    }, []);
 
-    const handleSearch = async () => {
+    const handleSearch = useCallback(async () => {
         if (!file) return;
 
         setIsSearching(true);
@@ -50,7 +51,7 @@ export default function VisualSearchPage() {
             setError("Error processing image.");
             setIsSearching(false);
         }
-    };
+    }, [file]);
 
     return (
         <div className="container mx-auto p-4 max-w-6xl">
@@ -68,9 +69,9 @@ export default function VisualSearchPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center justify-center w-full">
-                            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors relative overflow-hidden">
                                 {previewUrl ? (
-                                    <img src={previewUrl} alt="Preview" className="h-full object-contain p-2" />
+                                    <Image unoptimized fill sizes="100vw" src={previewUrl} alt="Preview" className="object-contain p-2" />
                                 ) : (
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted-foreground">
                                         <Camera className="w-10 h-10 mb-2" />
@@ -121,11 +122,15 @@ export default function VisualSearchPage() {
                                 <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                                     <div className="aspect-square relative bg-muted">
                                         {/* In a real app, use Next.js Image component */}
-                                        <img
+                                        <Image
                                             src={product.imageUrl}
                                             alt={product.name}
-                                            className="object-cover w-full h-full"
+                                            fill
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                            className="object-cover"
                                             onError={(e) => {
+                                                // @ts-ignore
+                                                (e.target as HTMLImageElement).srcset = '';
                                                 (e.target as HTMLImageElement).src = 'https://placehold.co/400x400?text=No+Image';
                                             }}
                                         />
