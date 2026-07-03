@@ -19,6 +19,15 @@ export type SearchResult = {
   similarity: number;
 };
 
+interface SupabaseSearchResult {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    image_url: string;
+    similarity: number;
+}
+
 export async function searchSimilarProducts(imageBase64: string): Promise<SearchResult[]> {
   try {
     // 1. Analyze Image with Gemini Vision to get a text description
@@ -71,7 +80,7 @@ export async function searchSimilarProducts(imageBase64: string): Promise<Search
         throw new Error("Failed to search products.");
     }
 
-    return searchResults.map((item: any) => ({
+    return (searchResults as SupabaseSearchResult[]).map((item) => ({
         id: item.id,
         name: item.name,
         description: item.description,
