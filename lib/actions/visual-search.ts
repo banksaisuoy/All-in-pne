@@ -71,6 +71,7 @@ export async function searchSimilarProducts(imageBase64: string): Promise<Search
         throw new Error("Failed to search products.");
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return searchResults.map((item: any) => ({
         id: item.id,
         name: item.name,

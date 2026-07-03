@@ -7,92 +7,79 @@ import { createClient } from '@supabase/supabase-js';
 
 // Define the schema for the AI output
 const productMetadataSchema = z.object({
-  name: z.string(),
-  description: z.string(),
-  description_html: z.string().describe('HTML formatted description with h3, p, ul tags'),
-  price: z.number(),
-  tags: z.array(z.string()),
-  color: z.string(),
+    name: z.string().describe('A catchy, SEO-friendly name for the product.'),
+    description: z.string().describe('A short, plain-text description of the product.'),
+    description_html: z.string().describe('A detailed, HTML-formatted description of the product. Use <p>, <ul>, <li>.'),
+    category: z.string().describe('The main category for the product (e.g., Electronics, Home, Fashion).'),
+    price: z.number().describe('A suggested retail price in USD.'),
+    tags: z.array(z.string()).describe('An array of 3-5 relevant tags for searchability.'),
 });
 
 export type ProductMetadata = z.infer<typeof productMetadataSchema>;
 
 export async function generateProductMetadata(imageBase64: string): Promise<ProductMetadata> {
-  try {
-    // 1. Generate Metadata with Gemini Vision (Base64 handling ensures privacy/no public URL needed)
-    const { object } = await generateObject({
-      model: aiModel,
-      schema: productMetadataSchema,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: 'Analyze this product image. Identify the product, create a high-converting SEO description (HTML format), suggest a market price, and generate tags.' },
-            { type: 'image', image: imageBase64 },
-          ],
-        },
-      ],
-    });
+    try {
+        const { object } = await generateObject({
+            model: aiModel,
+            schema: productMetadataSchema,
+            messages: [
+                {
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: 'Analyze this image and generate comprehensive product metadata for an e-commerce store.' },
+                        { type: 'image', image: imageBase64 },
+                    ],
+                },
+            ],
+        });
 
-    return object;
-  } catch (error) {
-    console.error('AI Generation Error:', error);
-    throw new Error('Failed to generate product metadata.');
-  }
+        return object;
+    } catch (error) {
+        console.error("Failed to generate metadata:", error);
+        throw new Error("AI analysis failed.");
+    }
 }
 
-export async function saveProductToDb(data: ProductMetadata & { imageUrl: string }) {
-    // In a real app, we would use the server-side supabase client with service role for admin tasks
-    // verifying permissions. For this demo, we assume the environment is set up.
-
+export async function saveProductToDb(product: ProductMetadata & { imageUrl: string }) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Use service role for admin writes
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-    // Fallback for demo if keys aren't present
     if (!supabaseUrl || !supabaseServiceKey) {
-        console.warn("Supabase keys missing. Simulating DB save with embedding.");
-        return { success: true, id: 'simulated-id', ...data, embedding_simulated: true };
+        console.warn("Supabase keys missing. Mocking db save.");
+        // Mock save delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return { success: true, id: 'mock-id' };
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 2. Generate Vector Embedding using text-embedding-004
-    // We combine name, description, and tags for a rich semantic representation
-    const textToEmbed = `${data.name} ${data.description} ${data.tags.join(' ')}`;
+    // Generate embedding for semantic search
+    const embeddingText = `${product.name} ${product.category} ${product.tags.join(' ')}`;
+    const { embedding } = await embed({
+        model: embeddingModel,
+        value: embeddingText,
+    });
 
-    let embedding: number[] = [];
-    try {
-        const { embedding: generatedEmbedding } = await embed({
-            model: embeddingModel,
-            value: textToEmbed,
-        });
-        embedding = generatedEmbedding;
-    } catch (error) {
-        console.error("Embedding Generation Error:", error);
-        // We might choose to proceed without embedding or fail hard.
-        // For a "God Mode" system, we likely want to fail or retry, but here we'll throw.
-        throw new Error("Failed to generate vector embedding.");
-    }
-
-    // 3. Save to Supabase (Transactional atomic insert logic via single query)
-    const { data: insertedData, error } = await supabase
+    const { data, error } = await supabase
         .from('products')
-        .insert({
-            name: data.name,
-            description: data.description,
-            description_html: data.description_html,
-            price: data.price,
-            image_url: data.imageUrl,
-            tags: data.tags,
-            vector_embedding: embedding, // Save the vector
-        })
+        .insert([
+            {
+                name: product.name,
+                description: product.description,
+                description_html: product.description_html,
+                price: product.price,
+                image_url: product.imageUrl,
+                tags: product.tags,
+                vector_embedding: embedding
+            }
+        ])
         .select()
         .single();
 
     if (error) {
-        console.error("DB Error:", error);
-        throw new Error("Failed to save product to database");
+        console.error("Supabase insert error:", error);
+        throw new Error("Failed to save to database.");
     }
 
-    return { success: true, data: insertedData };
+    return { success: true, id: data.id };
 }
