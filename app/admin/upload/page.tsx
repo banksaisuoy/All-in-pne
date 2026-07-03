@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, Upload, Check, Wand2 } from 'lucide-react';
+import Image from 'next/image';
 
 export default function MagicUploader() {
     const [file, setFile] = useState<File | null>(null);
@@ -102,7 +103,9 @@ export default function MagicUploader() {
                         <div className="flex items-center justify-center w-full">
                             <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                                 {previewUrl ? (
-                                    <img src={previewUrl} alt="Preview" className="h-full object-contain" />
+                                    <div className="relative w-full h-full">
+                                        <Image src={previewUrl} alt="Preview" fill unoptimized className="object-contain" sizes="100vw" />
+                                    </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                         <Upload className="w-8 h-8 mb-4 text-gray-500" />

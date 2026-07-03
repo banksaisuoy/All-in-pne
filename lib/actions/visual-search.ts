@@ -71,7 +71,8 @@ export async function searchSimilarProducts(imageBase64: string): Promise<Search
         throw new Error("Failed to search products.");
     }
 
-    return searchResults.map((item: any) => ({
+    // Use unknown first, then cast to a specific structure if needed or validate
+    return searchResults.map((item: { id: string, name: string, description: string, price: number, image_url: string, similarity: number }) => ({
         id: item.id,
         name: item.name,
         description: item.description,

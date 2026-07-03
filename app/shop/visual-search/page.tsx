@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Camera, Search, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 export default function VisualSearchPage() {
     const [file, setFile] = useState<File | null>(null);
@@ -70,7 +71,9 @@ export default function VisualSearchPage() {
                         <div className="flex items-center justify-center w-full">
                             <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                                 {previewUrl ? (
-                                    <img src={previewUrl} alt="Preview" className="h-full object-contain p-2" />
+                                    <div className="relative w-full h-full p-2">
+                                        <Image src={previewUrl} alt="Preview" fill unoptimized className="object-contain" sizes="100vw" />
+                                    </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted-foreground">
                                         <Camera className="w-10 h-10 mb-2" />
@@ -120,12 +123,14 @@ export default function VisualSearchPage() {
                             {results.map((product) => (
                                 <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                                     <div className="aspect-square relative bg-muted">
-                                        {/* In a real app, use Next.js Image component */}
-                                        <img
-                                            src={product.imageUrl}
+                                        <Image
+                                            src={product.imageUrl || 'https://placehold.co/400x400?text=No+Image'}
                                             alt={product.name}
-                                            className="object-cover w-full h-full"
+                                            fill
+                                            className="object-cover"
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                             onError={(e) => {
+                                                (e.target as HTMLImageElement).srcset = '';
                                                 (e.target as HTMLImageElement).src = 'https://placehold.co/400x400?text=No+Image';
                                             }}
                                         />
