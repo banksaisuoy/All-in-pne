@@ -49,13 +49,11 @@ export async function searchSimilarProducts(imageBase64: string): Promise<Search
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-    // Fallback for demo
-    if (!supabaseUrl || !supabaseServiceKey) {
-        console.warn("Supabase keys missing. Returning mock results.");
-        return [
-            { id: '1', name: 'Mock Product 1', description: 'Similar product found', price: 99.99, imageUrl: '/mock1.jpg', similarity: 0.95 },
-            { id: '2', name: 'Mock Product 2', description: 'Another similar product', price: 49.99, imageUrl: '/mock2.jpg', similarity: 0.88 },
-        ];
+    // Fallback for demo using standard mock data
+    if (!supabaseUrl || !supabaseServiceKey || supabaseUrl.includes('your-project.supabase.co')) {
+        console.warn("Supabase keys missing or invalid. Returning mock results.");
+        const { mockProducts } = await import('../db/mock');
+        return mockProducts;
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);

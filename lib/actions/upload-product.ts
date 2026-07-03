@@ -49,8 +49,19 @@ export async function saveProductToDb(data: ProductMetadata & { imageUrl: string
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Use service role for admin writes
 
     // Fallback for demo if keys aren't present
-    if (!supabaseUrl || !supabaseServiceKey) {
-        console.warn("Supabase keys missing. Simulating DB save with embedding.");
+    if (!supabaseUrl || !supabaseServiceKey || supabaseUrl.includes('your-project.supabase.co')) {
+        console.warn("Supabase keys missing or invalid. Simulating DB save with embedding.");
+        const { mockProducts } = await import('../db/mock');
+        mockProducts.push({
+           id: `simulated-id-${Date.now()}`,
+           category: 'Uncategorized',
+           similarity: 1.0,
+           name: data.name,
+           description: data.description,
+           price: data.price,
+           imageUrl: data.imageUrl,
+           tags: data.tags,
+        });
         return { success: true, id: 'simulated-id', ...data, embedding_simulated: true };
     }
 
