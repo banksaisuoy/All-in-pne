@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, Upload, Check, Wand2 } from 'lucide-react';
+import Image from 'next/image';
 
 export default function MagicUploader() {
     const [file, setFile] = useState<File | null>(null);
@@ -32,31 +33,21 @@ export default function MagicUploader() {
         setStatusMessage('Sending to Gemini Vision API...');
 
         try {
-            // Convert file to base64
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onloadend = async () => {
-                const base64data = reader.result as string;
-                // Remove the prefix (data:image/jpeg;base64,) if necessary for some APIs,
-                // but usually Vercel AI SDK handles it or wants just the base64 part.
-                // Depending on config, 'image' part of 'user' content supports data urls.
-
-                try {
-                    setStatusMessage('Gemini is analyzing the image...');
-                    const metadata = await generateProductMetadata(base64data);
-                    setGeneratedData(metadata);
-                    setStatusMessage('Analysis complete! Please review.');
-                } catch (err) {
-                    console.error(err);
-                    setStatusMessage('Error analyzing image.');
-                } finally {
-                    setIsAnalyzing(false);
-                }
-            };
+            const base64data = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            setStatusMessage('Gemini is analyzing the image...');
+            const metadata = await generateProductMetadata(base64data);
+            setGeneratedData(metadata);
+            setStatusMessage('Analysis complete! Please review.');
         } catch (error) {
             console.error(error);
-            setIsAnalyzing(false);
             setStatusMessage('Error processing file.');
+        } finally {
+            setIsAnalyzing(false);
         }
     };
 
@@ -100,9 +91,9 @@ export default function MagicUploader() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center justify-center w-full">
-                            <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <label className="relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 overflow-hidden">
                                 {previewUrl ? (
-                                    <img src={previewUrl} alt="Preview" className="h-full object-contain" />
+                                    <Image src={previewUrl} alt="Preview" fill className="object-contain" unoptimized />
                                 ) : (
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                         <Upload className="w-8 h-8 mb-4 text-gray-500" />
