@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Camera, Search, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 export default function VisualSearchPage() {
     const [file, setFile] = useState<File | null>(null);
@@ -31,20 +32,23 @@ export default function VisualSearchPage() {
         setError(null);
 
         try {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onloadend = async () => {
-                const base64data = reader.result as string;
-                try {
-                    const searchResults = await searchSimilarProducts(base64data);
-                    setResults(searchResults);
-                } catch (err) {
-                    console.error(err);
-                    setError("Failed to find similar products. Please try again.");
-                } finally {
-                    setIsSearching(false);
-                }
-            };
+            const base64data = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onloadend = () => {
+                    resolve(reader.result as string);
+                };
+                reader.onerror = reject;
+            });
+            try {
+                const searchResults = await searchSimilarProducts(base64data);
+                setResults(searchResults);
+            } catch (err) {
+                console.error(err);
+                setError("Failed to find similar products. Please try again.");
+            } finally {
+                setIsSearching(false);
+            }
         } catch (err) {
             console.error(err);
             setError("Error processing image.");
@@ -68,9 +72,11 @@ export default function VisualSearchPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center justify-center w-full">
-                            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors relative">
                                 {previewUrl ? (
-                                    <img src={previewUrl} alt="Preview" className="h-full object-contain p-2" />
+                                    <div className="relative w-full h-full p-2">
+                                        <Image src={previewUrl} alt="Preview" fill sizes="100vw" className="object-contain" unoptimized />
+                                    </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted-foreground">
                                         <Camera className="w-10 h-10 mb-2" />
@@ -121,12 +127,15 @@ export default function VisualSearchPage() {
                                 <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                                     <div className="aspect-square relative bg-muted">
                                         {/* In a real app, use Next.js Image component */}
-                                        <img
+                                        <Image
                                             src={product.imageUrl}
                                             alt={product.name}
-                                            className="object-cover w-full h-full"
+                                            fill
+                                            sizes="100vw"
+                                            className="object-cover"
                                             onError={(e) => {
-                                                (e.target as HTMLImageElement).src = 'https://placehold.co/400x400?text=No+Image';
+                                                (e.currentTarget as HTMLImageElement).srcset = '';
+                                                (e.currentTarget as HTMLImageElement).src = 'https://placehold.co/400x400?text=No+Image';
                                             }}
                                         />
                                         <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
