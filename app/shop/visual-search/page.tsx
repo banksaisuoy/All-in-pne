@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { searchSimilarProducts, SearchResult } from '@/lib/actions/visual-search';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -67,10 +68,10 @@ export default function VisualSearchPage() {
                         <CardDescription>Upload a photo to find matching products.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex items-center justify-center w-full">
-                            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center justify-center w-full relative">
+                            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors relative overflow-hidden">
                                 {previewUrl ? (
-                                    <img src={previewUrl} alt="Preview" className="h-full object-contain p-2" />
+                                    <Image src={previewUrl} alt="Preview" className="object-contain p-2" fill sizes="(max-width: 768px) 100vw, 50vw" unoptimized />
                                 ) : (
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted-foreground">
                                         <Camera className="w-10 h-10 mb-2" />
@@ -121,13 +122,16 @@ export default function VisualSearchPage() {
                                 <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                                     <div className="aspect-square relative bg-muted">
                                         {/* In a real app, use Next.js Image component */}
-                                        <img
+                                        <Image
                                             src={product.imageUrl}
                                             alt={product.name}
-                                            className="object-cover w-full h-full"
+                                            className="object-cover"
+                                            fill
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                             onError={(e) => {
-                                                (e.target as HTMLImageElement).src = 'https://placehold.co/400x400?text=No+Image';
+                                                (e.currentTarget as HTMLImageElement).src = 'https://placehold.co/400x400?text=No+Image';
                                             }}
+                                            unoptimized
                                         />
                                         <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
                                             {Math.round(product.similarity * 100)}% Match
