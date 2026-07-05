@@ -71,13 +71,13 @@ export async function searchSimilarProducts(imageBase64: string): Promise<Search
         throw new Error("Failed to search products.");
     }
 
-    return searchResults.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        price: item.price,
-        imageUrl: item.image_url,
-        similarity: item.similarity
+    return (searchResults as Record<string, unknown>[]).map((item) => ({
+        id: item.id as string,
+        name: item.name as string,
+        description: item.description as string,
+        price: item.price as number,
+        imageUrl: item.image_url as string,
+        similarity: item.similarity as number
     }));
 
   } catch (error) {
